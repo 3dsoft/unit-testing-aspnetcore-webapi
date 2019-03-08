@@ -3,20 +3,25 @@
 Examples included in the blog post: https://code-maze.com/unit-testing-aspnetcore-web-api/
 
 
-# 주의 사항
 
-# 테스트 대상 프로젝트를 참조 추가
 
-# Nuget에서 Microsoft.AspNetCore.App 설치할것 (버전 확인할것!!!)
+# 설치 방법
+
+1.테스트 대상 프로젝트를 참조 추가
+
+2.Nuget에서 Microsoft.AspNetCore.App 설치할것 (버전 확인할것!!!)
 
   * 대상 프로젝트의 Microsoft.AspNetCore.App과 동일한 버전을 설치해야한다.
   
     버전이 다르면 테스트 함수를 못 찾아서 테스트가 안됨
 
 
-# xUnit 클래스의 생성자를 만들고, 테스트할 Controller의 필드 멤버와 테스트할 Fake 클래스를 선언해준다.
 
-'''
+# 생성자 설정 방법
+
+xUnit 클래스의 생성자를 만들고, 테스트할 Controller의 필드 멤버와 테스트할 Fake 클래스를 선언해준다.
+
+```
 private readonly ShoppingCartServiceFake _service;
 private readonly ShoppingCartController _controller;
 
@@ -28,34 +33,35 @@ public ShoppingCartControllerTest()
     // 테스트할 Controller 클래스
     _controller = new ShoppingCartController(_service);
 }
-'''
+```
 
 
 # Assert.IsType()을 사용해서 체크하려면 Controller의 return 타입을 ObjectResult 형식으로 명확히 지정해줘야한다.
 
 아래처럼 return하면 xUnit에서 반환받았을때 객체 타입이 null이된다.
 
-'''
+```
 [HttpGet]
 public ActionResult<IEnumerable<string>> Get()
 {
     return new string[] { "value1", "value2" };
 }
-'''
+```
 
 xUnit에서 Assert.IsType()을 받으려면 아래와 같이 해줘야한다.
 
-'''
+```
 [HttpGet]
 public ActionResult<IEnumerable<string>> Get()
 {
     return Ok(new string[] { "value1", "value2" });
 }
-'''  
+```  
   
   
 # Get 테스트 방법
 
+```
 [Fact]
 public void Get_WhenCalled_ReturnsOkResult()
 {
@@ -75,7 +81,6 @@ public void Get_WhenCalled_ReturnsAllItems()
     // 주어진 두 값이 같으면 성공
     Assert.Equal(3, items.Count);
 }
-
 
 [Fact]
 public void GetById_UnknownGuidPassed_ReturnsNotFoundResult()
@@ -113,11 +118,12 @@ public void GetById_ExistingGuidPassed_ReturnsRightItem()
     // 리턴받은 값의 Value에서 Id 값이 testGuid와 같으면 성공
     Assert.Equal(testGuid, (okResult.Value as ShoppingItem).Id);
 }
-
+```
 
 
 # Post 테스트 (add)
 
+```
 [Fact]
 public void Add_InvalidObjectPassed_ReturnsBadRequest()
 {
@@ -177,10 +183,11 @@ public void Add_ValidObjectPassed_ReturnedResponseHasCreatedItem()
     // Value 값에서 Name이 box와 같으면 성공
     Assert.Equal("box", item.Name);
 }
-
+```
 
 # Delete 테스트
 
+```
 [Fact]
 public void Remove_NotExistingGuidPassed_ReturnsNotFoundResponse()
 {
@@ -191,7 +198,6 @@ public void Remove_NotExistingGuidPassed_ReturnsNotFoundResponse()
     // 결과가 NotFoundResult면 성공
     Assert.IsType<NotFoundResult>(badResponse);
 }
-
 
 [Fact]
 public void Remove_ExistingGuidPassed_ReturnsOkResult()
@@ -214,9 +220,4 @@ public void Remove_ExistingGuidPassed_RemovesOneItem()
     // 삭제 후, 실제 Item 개수가 2개이면 성공
     Assert.Equal(2, _service.GetAllItems().Count());
 }
-
-
-
-
-
-
+```
